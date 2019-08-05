@@ -17,7 +17,6 @@ void clearScreen() {
         cout << "\033c";
     }
     cout << endl;
-
     return;
 
 }
@@ -35,7 +34,6 @@ void drawBoard(const vector <char> &gameBoard) {
         }
     }
     cout << endl;
-
     return;
 
 }
@@ -54,7 +52,6 @@ void initVector(vector <char> &v) {
     for (int i = 0; i < v.size(); ++i) {
       v.at(i) = static_cast<char> (initChar + i);
     }
-
     return;
 
 }
@@ -64,9 +61,11 @@ void initVector(vector <char> &v) {
 /// @return the integer index in the vector, should be 0 to (vector size - 1)
 int convertPosition(char boardPosition) {
 
-    // for (int )
-    return -1;
-
+// if board position is from a to i then return the index which is the int from result boardPos - 'a'
+  if (boardPosition >= 'a' && boardPosition <= 'i') {
+    return boardPosition - 97;
+  }
+  return -1;
 }
 
 
@@ -74,7 +73,7 @@ int convertPosition(char boardPosition) {
 /// @param board the current tic-tac-toe board
 /// @param position is an index into vector to check if available
 /// @return true if position's state is available (not marked) AND is in bounds
-bool validPlacement(const vector<char>  &gameBoard, int positionIndex) {
+bool validPlacement(const vector<char> &gameBoard, int positionIndex) {
 
     if (positionIndex < gameBoard.size() &&
         gameBoard.at(positionIndex) != 'X' &&
@@ -95,11 +94,16 @@ bool validPlacement(const vector<char>  &gameBoard, int positionIndex) {
 int getPlay(const vector<char> &gameBoard) {
 
     char boardPosition = ' ';
-    cout << "Please choose a position: ";
-    cin >> boardPosition;
+    int index = 0;
 
+    do {
+      cout << "Please choose a position: " << endl;
+      cin >> boardPosition;
 
-    return -1;
+      index = convertPosition(boardPosition);
+    } while (!validPlacement(gameBoard, index));
+
+    return index;
 
 }
 
@@ -113,28 +117,30 @@ int getPlay(const vector<char> &gameBoard) {
 /// @return true if the game has been won, false otherwise
 bool gameWon(const vector<char> &gameBoard) {
 
-    //row
+//note: don't compare like this: (gameBoard.at(i) == gameBoard.at(i + 3) == gameBoard.at(i + 6))
+//                                will be evaluated like true(1) will not equal gameBoard.at())
+    //column
     for (int i = 0; i < 3; ++i) {
-      if (gameBoard.at(i) == gameBoard.at(i + 3) == gameBoard.at(i + 6)) {
+      if ((gameBoard.at(i) == gameBoard.at(i + 3)) && (gameBoard.at(i) == gameBoard.at(i + 6))) {
         return true;
       }
     }
 
-    //column
-    for (int i = 0; i < 3; i += 3) {
-      if (gameBoard.at(i) == gameBoard.at(i + 1) == gameBoard.at(i + 2)) {
+//notice i < 3 in col and i <= 6 in row because row skips
+    //row
+    for (int i = 0; i <= 6; i += 3) {
+      if ((gameBoard.at(i) == gameBoard.at(i + 1)) && (gameBoard.at(i) == gameBoard.at(i + 2))) {
         return true;
       }
     }
 
     //diagonal
-    if (gameBoard.at(0) == gameBoard.at(4) == gameBoard.at(8)) {
+    if ((gameBoard.at(0) == gameBoard.at(4)) && (gameBoard.at(0) == gameBoard.at(8))) {
       return true;
     }
-    else if (gameBoard.at(2) == gameBoard.at(4) == gameBoard.at(6)) {
+    else if ((gameBoard.at(2) == gameBoard.at(4)) && (gameBoard.at(2) == gameBoard.at(6))) {
       return true;
     }
-
     return false;
 
 }
@@ -167,29 +173,35 @@ int main() {
     /// Display empty board
     drawBoard(gameBoard);
 
-    /// TODO: Play until game is over
-    //while () {
-
+    /// Play until game is over
+    while (!boardFull(gameBoard) && !gameWon(gameBoard)) {
         /// Get a play
         curPlay = getPlay(gameBoard);
 
-        /// TODO: Set the play on the board
-
+        /// Set the play on the board
         /// Switch the turn to the other player
         if (whosTurn == PLAYER1) {
+          gameBoard.at(curPlay) = 'X';
           whosTurn = PLAYER2;
         }
         else {
+          gameBoard.at(curPlay) = 'O';
           whosTurn = PLAYER1;
         }
 
         /// Output the updated board
         drawBoard(gameBoard);
+    }
 
-    //}
-
-    /// TODO: Determine winner and output appropriate message
-
+    /// Determine winner and output appropriate message
+    if (gameWon(gameBoard)) {
+      if (whosTurn == PLAYER1) {
+        cout << "PLAYER 2 WINS!" << endl;
+      }
+      else {
+        cout << "PLAYER 1 WINS!" << endl;
+      }
+    }
     return 0;
 
 }
